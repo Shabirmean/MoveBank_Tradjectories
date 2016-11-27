@@ -40,7 +40,7 @@ def create_dataset(dataset, look_back=1):
 	return numpy.array(dataX), numpy.array(dataY)
 
 # reshape into X=t and Y=t+1
-look_back = 1
+look_back = 3
 trainX, trainY = create_dataset(train, look_back)
 testX, testY = create_dataset(test, look_back)
 
@@ -48,6 +48,7 @@ testX, testY = create_dataset(test, look_back)
 trainX = numpy.reshape(trainX, (trainX.shape[0], 1, trainX.shape[1]))
 testX = numpy.reshape(testX, (testX.shape[0], 1, testX.shape[1]))
 
+print testX.shape
 
 # create and fit the LSTM network
 model = Sequential()
@@ -58,7 +59,15 @@ model.fit(trainX, trainY, nb_epoch=5, batch_size=1, verbose=2)
 
 # make predictions
 trainPredict = model.predict(trainX)
-testPredict = model.predict(testX)
+testPredict = []
+for i in range(len(testX)):
+    pred = model.predict(numpy.reshape(testX[i], (1, 1, look_back)))
+    testPredict.append(pred[0])
+    for y in range(1,look_back+1):
+        print y
+        if i < len(testX)-y:
+            testX[i+y][0][look_back-y] = pred[0][0]
+
 
 # invert predictions
 trainPredict = scaler.inverse_transform(trainPredict)
