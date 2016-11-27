@@ -62,7 +62,6 @@ for i in range(len(testX)):
     pred = model.predict(numpy.reshape(testX[i], (1, 1, look_back)))
     testPredict.append(pred[0])
     for y in range(1,look_back+1):
-        print y
         if i < len(testX)-y:
             testX[i+y][0][look_back-y] = pred[0][0]
 
