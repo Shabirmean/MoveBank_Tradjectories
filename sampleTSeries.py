@@ -9,39 +9,49 @@ from keras.layers import LSTM
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 
+STEP = 10
+
 # convert an array of values into a dataset matrix
-def create_dataset(dataset, look_back=1):
+def create_dataset(dataset,names,look_back=1):
+    unames = numpy.unique(names)
+    print unames
     dataX, dataY = [], []
-    for i in range(len(dataset)-look_back-1):
-        a = dataset[i:(i+look_back),:]
-        dataX.append(a)
-        dataY.append(dataset[i + look_back, :])
+    for n in unames:
+        nameset = dataset[numpy.array(names) == n]
+        print len(nameset)
+        for i in range(len(nameset)-look_back-1):
+            a = nameset[i:(i+look_back),:]
+            dataX.append(a)
+            dataY.append(nameset[i + look_back, :])
     return numpy.array(dataX), numpy.array(dataY)
 
 # fix random seed for reproducibility
 numpy.random.seed(1)
 
 # load the dataset
-dataframe = pandas.read_csv('./tortsm.csv', usecols=[2,3], engine='python')
+dataframe = pandas.read_csv('./tortsm.csv', usecols=[2,3,8], engine='python')
 dataset = dataframe.values
-dataset = dataset.astype('float32')
+names = dataframe['individual-local-identifier'].astype('str')
+dataset = dataset[:,0:2].astype('float32')
 
 # normalize the dataset
 scaler = MinMaxScaler(feature_range=(-1, 1))
 dataset = scaler.fit_transform(dataset)
 
 # split into train and test sets
-dataset = dataset[0:1000]
+dataset = dataset[:100000, :][::STEP, :]
+names = names[:100000][::STEP]
 
-train_size = int(len(dataset) * 0.67)
+train_size = int(len(dataset) * 0.9)
 test_size = len(dataset) - train_size
 train, test = dataset[0:train_size,:], dataset[train_size:len(dataset),:]
+namtrain, namtest = names[0:train_size], names[train_size:len(dataset)]
 
 # reshape into X=t and Y=t+1
 look_back = 3
 
-trainX, trainY = create_dataset(train, look_back)
-testX, testY = create_dataset(test, look_back)
+trainX, trainY = create_dataset(train, namtrain, look_back)
+testX, testY = create_dataset(test, namtest, look_back)
 
 # reshape input to be [samples, time steps, features]
 trainX = numpy.reshape(trainX, (trainX.shape[0], trainX.shape[1], 2))
@@ -56,7 +66,7 @@ model = Sequential()
 model.add(LSTM(10, input_dim=2))
 model.add(Dense(2))
 model.compile(loss='mean_squared_error', optimizer='adam')
-model.fit(trainX, trainY, nb_epoch=10, batch_size=1, verbose=2)
+model.fit(trainX, trainY, nb_epoch=100, batch_size=1, verbose=2)
 
 def randError(l):
     return random.random()*l*0.005
@@ -95,7 +105,7 @@ trainPredictPlot[look_back:len(trainPredict)+look_back, :] = trainPredict
 # shift test predictions for plotting
 testPredictPlot = numpy.empty_like(dataset)
 testPredictPlot[:, :] = numpy.nan
-testPredictPlot[len(trainPredict)+(look_back*2)+1:len(dataset)-1, :] = testPredict
+testPredictPlot[len(trainPredict)+(look_back*2)+1:len(trainPredict)+(look_back*2)+1+len(testPredict), :] = testPredict
 
 
 # plot baseline and predictions
