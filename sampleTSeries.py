@@ -14,11 +14,11 @@ STEP = 10
 # convert an array of values into a dataset matrix
 def create_dataset(dataset,names,look_back=1):
     unames = numpy.unique(names)
-    print unames
+    print (unames)
     dataX, dataY = [], []
     for n in unames:
         nameset = dataset[numpy.array(names) == n]
-        print len(nameset)
+        print (len(nameset))
         for i in range(len(nameset)-look_back-1):
             a = nameset[i:(i+look_back),:]
             dataX.append(a)
