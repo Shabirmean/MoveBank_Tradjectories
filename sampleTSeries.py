@@ -6,10 +6,13 @@ import random
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
+from keras.callbacks import EarlyStopping
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 
-STEP = 10
+STEP = 5
+
+early = EarlyStopping(monitor='val_loss', min_delta=0, patience=2, verbose=2, mode='auto')
 
 # convert an array of values into a dataset matrix
 def create_dataset(dataset,names,look_back=1):
@@ -42,7 +45,7 @@ dataset = scaler.fit_transform(dataset)
 dataset = dataset[:100000, :][::STEP, :]
 names = names[:100000][::STEP]
 
-train_size = int(len(dataset) * 0.9)
+train_size = int(len(dataset) * 0.75)
 test_size = len(dataset) - train_size
 train, test = dataset[0:train_size,:], dataset[train_size:len(dataset),:]
 namtrain, namtest = names[0:train_size], names[train_size:len(dataset)]
@@ -63,10 +66,10 @@ testY = numpy.reshape(testY, (testY.shape[0],2))
 
 # create and fit the LSTM network
 model = Sequential()
-model.add(LSTM(10, input_dim=2))
+model.add(LSTM(20, input_dim=2))
 model.add(Dense(2))
 model.compile(loss='mean_squared_error', optimizer='adam')
-model.fit(trainX, trainY, nb_epoch=100, batch_size=1, verbose=2)
+model.fit(trainX, trainY, nb_epoch=100, batch_size=1, verbose=2, callbacks=[early], validation_split=0.2)
 
 def randError(l):
     return random.random()*l*0.005
