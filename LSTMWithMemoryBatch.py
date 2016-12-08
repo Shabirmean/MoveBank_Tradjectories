@@ -59,9 +59,9 @@ model.add(LSTM(10, batch_input_shape=(batch_size, look_back, 1), stateful=True))
 model.add(Dense(1))
 model.compile(loss='mean_squared_error', optimizer='adam')
 
-for i in range(5):
+for i in range(200):
     print ("Epoch No: ", i)
-    model.fit(trainX, trainY, nb_epoch=1, batch_size=batch_size, verbose=2, shuffle=False)
+    model.fit(trainX, trainY, nb_epoch=1, batch_size=batch_size, verbose=2, shuffle=False, callbacks=[early], validation_split=0.2)
     model.reset_states()
 #
 # trainX_old = trainX
