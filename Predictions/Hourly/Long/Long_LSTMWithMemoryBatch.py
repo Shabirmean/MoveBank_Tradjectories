@@ -61,64 +61,66 @@ for tortoise in ['Connor', 'Isabela', 'Miriam', 'Nathalie', 'Sepp']:
     # dataset = dataset[:1000, :]
 
     # split into train and test sets
-    train_size = int(len(dataset) * 0.8)
-    test_size = len(dataset) - train_size
-    train, test = dataset[0:train_size, :], dataset[train_size:len(dataset), :]
+    # train_size = int(len(dataset) * 0.8)
+    # test_size = len(dataset) - train_size
+    # train, test = dataset[0:train_size, :], dataset[train_size:len(dataset), :]
 
     # reshape into X=t and Y=t+1
     look_back = 10
-    trainX, trainY = create_dataset(train, look_back)
-    testX, testY = create_dataset(test, look_back)
+    # trainX, trainY = create_dataset(train, look_back)
+    # testX, testY = create_dataset(test, look_back)
 
     # reshape input to be [samples, time steps, features]
-    trainX = numpy.reshape(trainX, (trainX.shape[0], trainX.shape[1], 1))
-    testX = numpy.reshape(testX, (testX.shape[0], testX.shape[1], 1))
+    # trainX = numpy.reshape(trainX, (trainX.shape[0], trainX.shape[1], 1))
+    # testX = numpy.reshape(testX, (testX.shape[0], testX.shape[1], 1))
 
     # create and fit the LSTM network
     batch_size = 1
-    model = Sequential()
-    model.add(LSTM(10, batch_input_shape=(batch_size, look_back, 1), stateful=True))
-    model.add(Dense(1))
-    model.compile(loss='mean_squared_error', optimizer='adam')
-
-    for i in range(50):
-        print("Epoch No: ", i)
-        model.fit(trainX, trainY, nb_epoch=1, batch_size=batch_size, verbose=2,
-                  shuffle=False, callbacks=[early], validation_split=0.2)
-        model.reset_states()
+    # model = Sequential()
+    # model.add(LSTM(10, batch_input_shape=(batch_size, look_back, 1), stateful=True))
+    # model.add(Dense(1))
+    # model.compile(loss='mean_squared_error', optimizer='adam')
+    #
+    # for i in range(50):
+    #     print("Epoch No: ", i)
+    #     model.fit(trainX, trainY, nb_epoch=1, batch_size=batch_size, verbose=2,
+    #               shuffle=False, callbacks=[early], validation_split=0.2)
+    #     model.reset_states()
 
     # save the model related input objects
-    f = open('./LongResults/' + name_of_tortoise + '_objects.save', 'wb')
-    for obj in [trainX, trainY, testX, testY]:
-        cPickle.dump(obj, f, protocol=cPickle.HIGHEST_PROTOCOL)
-    f.close()
+    # f = open('./LongResults/' + name_of_tortoise + '_objects.save', 'wb')
+    # for obj in [trainX, trainY, testX, testY]:
+    #     cPickle.dump(obj, f, protocol=cPickle.HIGHEST_PROTOCOL)
+    # f.close()
+    #
+    # # Save the model generated
+    # model.save('./LongResults/' + name_of_tortoise + '_model.h5')  # creates a HDF5 file 'my_model.h5'
+    #
+    # # save the model architecture as a JSON
+    # json_string = model.to_json()
+    # savePickleFile(json_string, './LongResults/' + name_of_tortoise + '_json.json')
 
-    # Save the model generated
-    model.save('./LongResults/' + name_of_tortoise + '_model.h5')  # creates a HDF5 file 'my_model.h5'
-
-    # save the model architecture as a JSON
-    json_string = model.to_json()
-    savePickleFile(json_string, './LongResults/' + name_of_tortoise + '_json.json')
-    print("--------------------------------------------------")
-    print("Completed Model for Tortoise %s" % (tortoise))
-    print("--------------------------------------------------")
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # # Load saved objects prior to predictions
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    # model = load_model('./LongResults/' + name_of_tortoise + '_model.h5')
-    #
-    # f = open('./LongResults/' + name_of_tortoise + '_objects.save', 'rb')
-    # loaded_objects = []
-    # for i in range(4):
-    #     loaded_objects.append(cPickle.load(f))
-    # f.close()
+    model = load_model('./LongResults/' + name_of_tortoise + '_model.h5')
 
-    # trainX_old = trainX
-    # trainY_old = trainY
-    # testX_old = testX
-    # testY_old = testY
+    f = open('./LongResults/' + name_of_tortoise + '_objects.save', 'rb')
+    loaded_objects = []
+    for i in range(4):
+        loaded_objects.append(cPickle.load(f))
+    f.close()
+
+    trainX = loaded_objects[0]
+    trainY = loaded_objects[1]
+    testX = loaded_objects[2]
+    testY = loaded_objects[3]
+
+    print("--------------------------------------------------")
+    print("Completed Model for Tortoise %s" % (tortoise))
+    print("--------------------------------------------------")
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # # make predictions
