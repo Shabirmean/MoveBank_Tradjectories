@@ -156,4 +156,5 @@ for tortoise in ['Connor', 'Isabela', 'Miriam', 'Nathalie', 'Sepp']:
     plt.plot(scaler.inverse_transform(dataset))
     plt.plot(trainPredictPlot)
     plt.plot(testPredictPlot)
+    plt.savefig('Long_plot_' + name_of_tortoise +'.svg', format='svg', dpi=1200)
     plt.show()
