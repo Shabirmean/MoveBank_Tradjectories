@@ -156,5 +156,13 @@ for tortoise in ['Connor', 'Isabela', 'Miriam', 'Nathalie', 'Sepp']:
     plt.plot(scaler.inverse_transform(dataset))
     plt.plot(trainPredictPlot)
     plt.plot(testPredictPlot)
+    plt.plot(scaler.inverse_transform(dataset), label='Original Trajectory (Latitude)')
+    plt.plot(trainPredictPlot, label='Prediction on Train Set')
+    plt.plot(testPredictPlot, label='Prediction on Test Set')
+
+    plt.legend(loc='best')
+    plt.title('Hourly Latitude Predictions for ' + name_of_tortoise)
+    plt.ylabel('Latitude')
+    plt.xlabel('Hour Count (Starting from 2010-10-01 11:00:00)')
     plt.savefig('Lat_plot_' + name_of_tortoise +'.svg', format='svg', dpi=1200)
     plt.show()
